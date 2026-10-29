@@ -5,21 +5,19 @@ services:
     env: node
     plan: free
     rootDir: services/orders-service
-    buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: npm run prisma:deploy && npm run seed && npm start
+    buildCommand: npm install --include=dev && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3001
       - key: DATABASE_URL
         fromDatabase:
           name: ordertrack-db
           property: connectionString
       - key: JWT_SECRET
-        generateValue: true
+        value: ordertrack_upn_production_jwt_super_secret_key_2026
       - key: JWT_REFRESH_SECRET
-        generateValue: true
+        value: ordertrack_upn_production_jwt_refresh_secret_key_2026
 
   # ─── 2. Servicio de Tiempo Real (Socket.IO) ─────────────────────
   - type: web
@@ -27,18 +25,13 @@ services:
     env: node
     plan: free
     rootDir: services/realtime-service
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3002
       - key: JWT_SECRET
-        fromService:
-          type: web
-          name: ordertrack-orders-service
-          envVarKey: JWT_SECRET
+        value: ordertrack_upn_production_jwt_super_secret_key_2026
 
   # ─── 3. Frontend Angular (PWA / SPA) ────────────────────────────
   - type: web
