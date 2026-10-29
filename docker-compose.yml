@@ -1,0 +1,125 @@
+services:
+  # ─── Base de datos PostgreSQL ─────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: ordertrack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ordertrack}
+      POSTGRES_USER: ${POSTGRES_USER:-ordertrack_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ordertrack_user} -d ${POSTGRES_DB:-ordertrack}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── RabbitMQ (Mensajería) ────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: ordertrack-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-ordertrack_user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"    # Management UI
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── Servicio de pedidos ──────────────────────────────────────────────────────
+  orders-service:
+    build:
+      context: ./services/orders-service
+      dockerfile: Dockerfile
+    container_name: ordertrack-orders-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      ORDERS_SERVICE_PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ordertrack_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ordertrack}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${FRONTEND_URL:-http://localhost:4200}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-ordertrack_user}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+      REALTIME_SERVICE_URL: http://realtime-service:3002
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ─── Servicio de tiempo real ──────────────────────────────────────────────────
+  realtime-service:
+    build:
+      context: ./services/realtime-service
+      dockerfile: Dockerfile
+    container_name: ordertrack-realtime
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      REALTIME_SERVICE_PORT: 3002
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${FRONTEND_URL:-http://localhost:4200}
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-ordertrack_user}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    ports:
+      - "3002:3002"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3002/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ─── Frontend Angular ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        ORDERS_SERVICE_URL: ${ORDERS_SERVICE_URL:-http://localhost:3001}
+        REALTIME_SERVICE_URL: ${REALTIME_SERVICE_URL:-http://localhost:3002}
+    container_name: ordertrack-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - orders-service
+      - realtime-service
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata:
+    driver: local
+  rabbitmqdata:
+    driver: local
+
+networks:
+  default:
+    name: ordertrack-network
+

@@ -1,0 +1,31 @@
+{
+  "name": "ordertrack-monorepo",
+  "version": "1.0.0",
+  "description": "OrderTrack — Plataforma web distribuida para la gestión y seguimiento de pedidos en tiempo real",
+  "private": true,
+  "scripts": {
+    "start:frontend": "cd frontend && npm start",
+    "start:orders": "cd services/orders-service && npm run dev",
+    "start:realtime": "cd services/realtime-service && npm run dev",
+    "build:all": "npm run build:orders && npm run build:realtime && npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:orders": "cd services/orders-service && npm run build",
+    "build:realtime": "cd services/realtime-service && npm run build",
+    "test:orders": "cd services/orders-service && npm test",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "angular",
+    "nodejs",
+    "express",
+    "postgresql",
+    "socketio",
+    "rabbitmq",
+    "distributed-systems",
+    "upn"
+  ],
+  "author": "OrderTrack Team (UPN)",
+  "license": "MIT"
+}
