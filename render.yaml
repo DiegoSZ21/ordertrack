@@ -41,10 +41,8 @@ services:
           envVarKey: JWT_SECRET
 
   # ─── 3. Frontend Angular (PWA / SPA) ────────────────────────────
-  - type: web
+  - type: static
     name: ordertrack-frontend
-    env: static
-    plan: free
     rootDir: frontend
     buildCommand: npm install --legacy-peer-deps && npm run build:prod
     staticPublishPath: ./dist/ordertrack-frontend/browser
