@@ -270,3 +270,4 @@ export class OrdersListComponent implements OnInit {
     return ORDER_STATUS_LABELS[status] ?? status;
   }
 }
+

@@ -51,3 +51,4 @@ export class ReportsService {
     return this.http.get<ApiResponse<PreparationTimeItem[]>>(`${this.apiUrl}/preparation-times`);
   }
 }
+

@@ -507,3 +507,4 @@ export class KitchenComponent implements OnInit, OnDestroy {
     return diffMins > 25; // Alerta si supera 25 minutos
   }
 }
+

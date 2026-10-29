@@ -188,3 +188,4 @@ Se han formulado pruebas automatizadas organizadas en:
 1. **Pasarelas de Pago:** Actualmente el sistema calcula y asienta pedidos con pago en efectivo/contraentrega. Como mejora futura, se puede integrar la pasarela de pagos Niubiz / Culqi / Yape QR.
 2. **Geolocalización GPS:** El estado `EN_CAMINO` notifica el despacho pero no cuenta aún con rastreo por GPS de motorizados sobre Google Maps.
 3. **Impresión de Comandas Térmicas:** Integración con impresoras ESC/POS mediante agentes de impresión local por USB/Red.
+

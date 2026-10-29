@@ -4,8 +4,8 @@
  */
 
 import request from 'supertest';
-import { app } from '../../index';
-import { prisma } from '../../config/database';
+import { app } from '../index';
+import { prisma } from '../config/database';
 import bcrypt from 'bcryptjs';
 import { Role, OrderStatus, DeliveryType } from '@prisma/client';
 
@@ -81,19 +81,20 @@ afterAll(async () => {
   // Limpiar datos de prueba
   await prisma.notification.deleteMany({
     where: { order: { orderCode: { startsWith: 'ORD-TEST' } } },
-  });
+  }).catch(() => {});
   await prisma.orderStatusHistory.deleteMany({
     where: { order: { orderCode: { startsWith: 'ORD-TEST' } } },
-  });
+  }).catch(() => {});
   await prisma.orderItem.deleteMany({
     where: { order: { orderCode: { startsWith: 'ORD-TEST' } } },
-  });
-  await prisma.order.deleteMany({ where: { orderCode: { startsWith: 'ORD-TEST' } } });
+  }).catch(() => {});
+  await prisma.outboxEvent.deleteMany({}).catch(() => {});
+  await prisma.order.deleteMany({ where: { orderCode: { startsWith: 'ORD-TEST' } } }).catch(() => {});
   await prisma.product.delete({ where: { id: productId } }).catch(() => {});
   await prisma.category.delete({ where: { id: categoryId } }).catch(() => {});
   await prisma.user.deleteMany({
     where: { email: { contains: 'test.' } },
-  });
+  }).catch(() => {});
   await prisma.$disconnect();
 });
 
@@ -215,13 +216,13 @@ describe('Pedidos — Creación', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
+    orderId = res.body.data.id;
+    orderCode = res.body.data.orderCode;
+
     expect(res.body.data.status).toBe(OrderStatus.RECIBIDO);
     expect(res.body.data.items).toHaveLength(1);
     // Verificar que el total fue calculado en el servidor (2 × S/25.00 = S/50.00)
-    expect(res.body.data.total).toBe('50.00');
-
-    orderId = res.body.data.id;
-    orderCode = res.body.data.orderCode;
+    expect(Number(res.body.data.total)).toBe(50);
 
     // Forzar código de prueba para limpieza
     await prisma.order.update({

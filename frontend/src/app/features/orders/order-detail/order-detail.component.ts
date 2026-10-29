@@ -377,3 +377,4 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     return ORDER_STATUS_LABELS[status] ?? status;
   }
 }
+

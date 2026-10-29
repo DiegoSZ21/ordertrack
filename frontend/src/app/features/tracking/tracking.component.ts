@@ -529,3 +529,4 @@ export class TrackingComponent implements OnInit, OnDestroy {
     return this.order()?.notes ?? 'Cancelado por el personal del restaurante.';
   }
 }
+
