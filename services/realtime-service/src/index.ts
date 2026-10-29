@@ -8,7 +8,7 @@ import winston from 'winston';
 
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
-const PORT = parseInt(process.env.REALTIME_SERVICE_PORT ?? '3002', 10);
+const PORT = parseInt(process.env.PORT ?? process.env.REALTIME_SERVICE_PORT ?? '3002', 10);
 const JWT_SECRET = process.env.JWT_SECRET ?? '';
 const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'http://localhost:4200';
 const RABBITMQ_URL = process.env.RABBITMQ_URL ?? '';
