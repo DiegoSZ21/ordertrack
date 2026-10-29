@@ -23,7 +23,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: config.cors.origin,
+  origin: true, // Permite conexiones desde localhost, celulares y tablets en la red local
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

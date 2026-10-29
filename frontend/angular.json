@@ -30,6 +30,7 @@
               }
             ],
             "styles": ["src/styles.scss"],
+            "inlineStyleLanguage": "scss",
             "scripts": []
           },
           "configurations": {
@@ -84,6 +85,7 @@
               }
             ],
             "styles": ["src/styles.scss"],
+            "inlineStyleLanguage": "scss",
             "scripts": []
           }
         }

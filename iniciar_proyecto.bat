@@ -32,3 +32,4 @@ timeout /t 8 /nobreak > nul
 start http://localhost:4200
 
 exit
+

@@ -33,7 +33,7 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: CORS_ORIGIN,
+    origin: true, // Permite conexiones WebSocket desde cualquier dispositivo en la red
     methods: ['GET', 'POST'],
     credentials: true,
   },
